@@ -3,7 +3,7 @@ defmodule Case2.MixProject do
 
   @app :case2
   @github "am-kantox/#{@app}"
-  @version "0.1.0"
+  @version "0.1.1"
 
   def project do
     [
@@ -37,7 +37,10 @@ defmodule Case2.MixProject do
   defp deps do
     [
       {:recase, "~> 0.4", only: :dev, runtime: false},
-      {:benchfella, "~> 0.3", only: :dev, runtime: false}
+      {:benchfella, "~> 0.3", only: :dev, runtime: false},
+      {:credo, "~> 1.0", only: :dev, runtime: false},
+      {:dialyxir, "~> 0.5", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.11", only: :dev}
     ]
   end
 
