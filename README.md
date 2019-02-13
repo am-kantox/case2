@@ -2,6 +2,17 @@
 
 **Drop-in replacement for [`Recase`](https://github.com/sobolevn/recase) supporting Unicode [Default Identifiers](https://hexdocs.pm/elixir/unicode-syntax.html#r1-default-identifiers).**
 
+## Use cases
+
+```elixir
+iex> Case2.to_snake "foo_barBaz-λambdaΛambda-привет-Мир"
+#⇒ "foo_bar_baz_λambda_λambda_привет_мир"
+iex> Case2.underscore "foo_barBaz-λambdaΛambda-привет-Мир"
+#⇒ "foo_bar_baz_λambda_λambda_привет_мир"
+```
+
+For more use-cases check the documentation for [`Case2`](https://hexdocs.pm/case2/Case2.html) module.
+
 ## Installation
 
 ```elixir
