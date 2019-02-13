@@ -3,7 +3,7 @@ defmodule Case2.MixProject do
 
   @app :case2
   @github "am-kantox/#{@app}"
-  @version "0.1.2"
+  @version "0.1.3"
 
   def project do
     [

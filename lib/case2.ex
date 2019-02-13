@@ -17,13 +17,7 @@ defmodule Case2 do
   """
   @spec to_camel(input :: String.t()) :: String.t()
   def to_camel(input) when is_binary(input) do
-    result =
-      input
-      |> do_split()
-      |> Enum.map(fn <<char::utf8, rest::binary>> -> String.upcase(<<char::utf8>>) <> rest end)
-      |> Enum.join()
-
-    with <<char::utf8, rest::binary>> <- result,
+    with <<char::utf8, rest::binary>> <- rejoin(input, separator: "", case: :title),
          do: String.downcase(<<char::utf8>>) <> rest
   end
 
@@ -36,12 +30,8 @@ defmodule Case2 do
       "FooBarBazΛambdaΛambdaПриветМир"
   """
   @spec to_pascal(input :: String.t()) :: String.t()
-  def to_pascal(input) when is_binary(input) do
-    input
-    |> do_split()
-    |> Enum.map(fn <<char::utf8, rest::binary>> -> String.upcase(<<char::utf8>>) <> rest end)
-    |> Enum.join()
-  end
+  def to_pascal(input) when is_binary(input),
+    do: rejoin(input, separator: "", case: :title)
 
   @doc """
   Converts the input to **`snake`** case. Alias: **`underscore`**.
@@ -54,12 +44,8 @@ defmodule Case2 do
       "foo_bar_baz_λambda_λambda_привет_мир"
   """
   @spec to_snake(input :: String.t()) :: String.t()
-  def to_snake(input) when is_binary(input) do
-    input
-    |> do_split()
-    |> Enum.map(fn <<char::utf8, rest::binary>> -> String.downcase(<<char::utf8>>) <> rest end)
-    |> Enum.join("_")
-  end
+  def to_snake(input) when is_binary(input),
+    do: rejoin(input, separator: "_", case: :down)
 
   defdelegate underscore(input), to: Case2, as: :to_snake
 
@@ -72,12 +58,8 @@ defmodule Case2 do
       "foo-bar-baz-λambda-λambda-привет-мир"
   """
   @spec to_kebab(input :: String.t()) :: String.t()
-  def to_kebab(input) when is_binary(input) do
-    input
-    |> do_split()
-    |> Enum.map(fn <<char::utf8, rest::binary>> -> String.downcase(<<char::utf8>>) <> rest end)
-    |> Enum.join("-")
-  end
+  def to_kebab(input) when is_binary(input),
+    do: rejoin(input, separator: "-", case: :down)
 
   @doc """
   Converts the input to **`constant`** case.
@@ -88,12 +70,8 @@ defmodule Case2 do
       "FOO_BAR_BAZ_ΛAMBDA_ΛAMBDA_ПРИВЕТ_МИР"
   """
   @spec to_constant(input :: String.t()) :: String.t()
-  def to_constant(input) when is_binary(input) do
-    input
-    |> do_split()
-    |> Enum.join("_")
-    |> String.upcase()
-  end
+  def to_constant(input) when is_binary(input),
+    do: rejoin(input, separator: "_", case: :up)
 
   @doc """
   Converts the input to **`path`** case.
@@ -104,11 +82,8 @@ defmodule Case2 do
       "foo/bar/Baz/λambda/Λambda/привет/Мир"
   """
   @spec to_path(input :: String.t()) :: String.t()
-  def to_path(input) when is_binary(input) do
-    input
-    |> do_split()
-    |> Enum.join("/")
-  end
+  def to_path(input) when is_binary(input),
+    do: rejoin(input, separator: "/", case: :none)
 
   @doc """
   Converts the input to **`dot`** case.
@@ -119,12 +94,8 @@ defmodule Case2 do
       "foo.bar.baz.λambda.λambda.привет.мир"
   """
   @spec to_dot(input :: String.t()) :: String.t()
-  def to_dot(input) when is_binary(input) do
-    input
-    |> do_split()
-    |> Enum.map(fn <<char::utf8, rest::binary>> -> String.downcase(<<char::utf8>>) <> rest end)
-    |> Enum.join(".")
-  end
+  def to_dot(input) when is_binary(input),
+    do: rejoin(input, separator: ".", case: :down)
 
   @doc """
   Converts the input to **`sentence`** case.
@@ -140,13 +111,7 @@ defmodule Case2 do
   """
   @spec to_sentence(input :: String.t()) :: String.t()
   def to_sentence(input) when is_binary(input) do
-    result =
-      input
-      |> do_split()
-      |> Enum.map(fn <<char::utf8, rest::binary>> -> String.downcase(<<char::utf8>>) <> rest end)
-      |> Enum.join(" ")
-
-    with <<char::utf8, rest::binary>> <- result,
+    with <<char::utf8, rest::binary>> <- rejoin(input, separator: " ", case: :down),
          do: String.upcase(<<char::utf8>>) <> rest
   end
 
@@ -164,12 +129,8 @@ defmodule Case2 do
       "Foo Bar Baz Λambda Λambda Привет Мир"
   """
   @spec to_title(input :: String.t()) :: String.t()
-  def to_title(input) when is_binary(input) do
-    input
-    |> do_split()
-    |> Enum.map(fn <<char::utf8, rest::binary>> -> String.upcase(<<char::utf8>>) <> rest end)
-    |> Enum.join(" ")
-  end
+  def to_title(input) when is_binary(input),
+    do: rejoin(input, separator: " ", case: :title)
 
   @doc """
   Splits the input into **`list`**. Utility function.
@@ -181,6 +142,44 @@ defmodule Case2 do
   """
   @spec split(input :: String.t()) :: [String.t()]
   def split(input) when is_binary(input), do: do_split(input)
+
+  @doc """
+  Splits the input and **`rejoins`** it with a separator given. Optionally
+  converts parts to `downcase`, `upcase` or `titlecase`.
+
+  - `opts[:case] :: [:down | :up | :title | :none]`
+  - `opts[:separator] :: binary() | integer()`
+
+  Default separator is `?_`, default conversion is `:downcase` so that
+  it behaves the same way as `to_snake/1`.
+
+  ## Examples
+
+      iex> Case2.rejoin "foo_barBaz-λambdaΛambda-привет-Мир", separator: "__"
+      "foo__bar__baz__λambda__λambda__привет__мир"
+  """
+  @spec rejoin(input :: String.t(), opts :: Keyword.t()) :: String.t()
+  def rejoin(input, opts \\ []) when is_binary(input) do
+    mapper =
+      case Keyword.get(opts, :case, :down) do
+        :down ->
+          fn <<char::utf8, rest::binary>> -> String.downcase(<<char::utf8>>) <> rest end
+
+        :title ->
+          fn <<char::utf8, rest::binary>> -> String.upcase(<<char::utf8>>) <> rest end
+
+        :up ->
+          &String.upcase/1
+
+        _ ->
+          & &1
+      end
+
+    input
+    |> do_split()
+    |> Enum.map(mapper)
+    |> Enum.join(Keyword.get(opts, :separator, ?_))
+  end
 
   ##############################################################################
 
