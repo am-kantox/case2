@@ -1,4 +1,4 @@
-# Case2
+# DEPRECATED Case2 USE https://github.com/sobolevn/recase INSTEAD
 
 [![CircleCI](https://circleci.com/gh/am-kantox/case2.svg?style=svg)](https://circleci.com/gh/am-kantox/case2)  **Drop-in replacement for [`Recase`](https://github.com/sobolevn/recase) supporting Unicode [Default Identifiers](https://hexdocs.pm/elixir/unicode-syntax.html#r1-default-identifiers).**
 
